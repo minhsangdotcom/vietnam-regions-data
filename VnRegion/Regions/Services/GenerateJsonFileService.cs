@@ -294,9 +294,21 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                     }
                     continue;
                 }
-
-                // Add other properties
-                jsonObject[propertyName] = propertyInfo.GetValue(entity)?.ToString();
+                string? value = propertyInfo.GetValue(entity)?.ToString();
+                if (
+                    (
+                        typeof(T) == typeof(AdministrativeUnit)
+                        && propertyName == nameof(AdministrativeUnit.Id)
+                    )
+                    || propertyName == nameof(Region.AdministrativeUnitId)
+                )
+                {
+                    jsonObject[propertyName] = value == null ? 0 : int.Parse(value);
+                }
+                else
+                {
+                    jsonObject[propertyName] = value;
+                }
             }
 
             jsonArray.Add(jsonObject);
