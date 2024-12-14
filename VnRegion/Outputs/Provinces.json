@@ -1,6 +1,6 @@
 [
   {
-    "Id": "01JF22C4Y9599MJM4P0SG8P8TH",
+    "Id": "01JF23H3KEGGHB8XGB229ZGSAK",
     "Code": "01",
     "Name": "Hà Nội",
     "EnglishName": "Ha Noi",
@@ -9,7 +9,7 @@
     "AdministrativeUnitId": "1"
   },
   {
-    "Id": "01JF22C4ZDYENXMX1NE0XTDRW3",
+    "Id": "01JF23H3KHMBTF01C2GB0KEQ8N",
     "Code": "02",
     "Name": "Hà Giang",
     "EnglishName": "Ha Giang",
@@ -18,7 +18,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C4ZPASFERZWEEEPJ1RVP",
+    "Id": "01JF23H3KKHRYQ6H96AS502EKP",
     "Code": "04",
     "Name": "Cao Bằng",
     "EnglishName": "Cao Bang",
@@ -27,7 +27,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C4ZY538RNH36YFY96J5Z",
+    "Id": "01JF23H3KPHNZ92X2AW9CYKSFC",
     "Code": "06",
     "Name": "Bắc Kạn",
     "EnglishName": "Bac Kan",
@@ -36,7 +36,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C503SA1QJ54DN74CJD4X",
+    "Id": "01JF23H3KW1Y24XTRWKDKQ885H",
     "Code": "08",
     "Name": "Tuyên Quang",
     "EnglishName": "Tuyen Quang",
@@ -45,7 +45,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C50DDPNP7BVSAHX0HHNE",
+    "Id": "01JF23H3KYX3W2WGV7RPQBJFD4",
     "Code": "10",
     "Name": "Lào Cai",
     "EnglishName": "Lao Cai",
@@ -54,7 +54,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C50PXH4V6R7R3191DG8Z",
+    "Id": "01JF23H3M08JVMW1MHJXH7NGF4",
     "Code": "11",
     "Name": "Điện Biên",
     "EnglishName": "Dien Bien",
@@ -63,7 +63,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C50Y5XEWN86FCKWMDJK5",
+    "Id": "01JF23H3M1BTM9TCZ3M4872JCV",
     "Code": "12",
     "Name": "Lai Châu",
     "EnglishName": "Lai Chau",
@@ -72,7 +72,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5125158F0RFHFBJ4S6M",
+    "Id": "01JF23H3M2CF09PT2Y7ENTH2P8",
     "Code": "14",
     "Name": "Sơn La",
     "EnglishName": "Son La",
@@ -81,7 +81,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C51D4WKQTPFB3CG3EKF5",
+    "Id": "01JF23H3M514887077Q3AFXCA1",
     "Code": "15",
     "Name": "Yên Bái",
     "EnglishName": "Yen Bai",
@@ -90,7 +90,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C51N1V26ZAP2G7XNP3DR",
+    "Id": "01JF23H3M7WD9F45QWDHPDY5RR",
     "Code": "17",
     "Name": "Hoà Bình",
     "EnglishName": "Hoa Binh",
@@ -99,7 +99,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C51X47BC585VRMVM0S61",
+    "Id": "01JF23H3MC8MADWK2MB2GBYKQB",
     "Code": "19",
     "Name": "Thái Nguyên",
     "EnglishName": "Thai Nguyen",
@@ -108,7 +108,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5254BTD0TYX841WBSYD",
+    "Id": "01JF23H3MGSWD737GEW6E3HBTQ",
     "Code": "20",
     "Name": "Lạng Sơn",
     "EnglishName": "Lang Son",
@@ -117,7 +117,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C52EJ4VPWVBMVSEXM81K",
+    "Id": "01JF23H3MK4A3EJ3X58TYJD65S",
     "Code": "22",
     "Name": "Quảng Ninh",
     "EnglishName": "Quang Ninh",
@@ -126,7 +126,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C52P0FXKXQ2Z5TPYR8SD",
+    "Id": "01JF23H3MN2KNE8KMTV0CXPEDD",
     "Code": "24",
     "Name": "Bắc Giang",
     "EnglishName": "Bac Giang",
@@ -135,7 +135,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C530VWDJBTMYY2W147ZS",
+    "Id": "01JF23H3MRFBH1B73CM309QYEQ",
     "Code": "25",
     "Name": "Phú Thọ",
     "EnglishName": "Phu Tho",
@@ -144,7 +144,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C53BB46RJY5G07SY2FS0",
+    "Id": "01JF23H3MWVT3YMFCZXECXZ35V",
     "Code": "26",
     "Name": "Vĩnh Phúc",
     "EnglishName": "Vinh Phuc",
@@ -153,7 +153,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C53H2ZX6ZZZNTY7XFH6Q",
+    "Id": "01JF23H3MY1V4EJD5THNJ0CSCK",
     "Code": "27",
     "Name": "Bắc Ninh",
     "EnglishName": "Bac Ninh",
@@ -162,7 +162,16 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C53QSF6NZ5DJC3XSM8FF",
+    "Id": "01JF23H3N2948D7X6216TH3Y6T",
+    "Code": "28",
+    "Name": "Hà Tây",
+    "EnglishName": "Ha Tay",
+    "FullName": "Tỉnh Hà Tây",
+    "EnglishFullName": "Ha Tay Province",
+    "AdministrativeUnitId": "2"
+  },
+  {
+    "Id": "01JF23H3N63Q0VMP87W1GA80FQ",
     "Code": "30",
     "Name": "Hải Dương",
     "EnglishName": "Hai Duong",
@@ -171,7 +180,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C542RB31392G2PRA044P",
+    "Id": "01JF23H3N9F18GX53HA7KQQ5W3",
     "Code": "31",
     "Name": "Hải Phòng",
     "EnglishName": "Hai Phong",
@@ -180,7 +189,7 @@
     "AdministrativeUnitId": "1"
   },
   {
-    "Id": "01JF22C54CRWPJ1TSD2NNMNBWS",
+    "Id": "01JF23H3NERX753PCWKZGBGSTF",
     "Code": "33",
     "Name": "Hưng Yên",
     "EnglishName": "Hung Yen",
@@ -189,7 +198,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C54K3PBS3W1D1KPNVF2R",
+    "Id": "01JF23H3NGX64NEWR99S83EG4Y",
     "Code": "34",
     "Name": "Thái Bình",
     "EnglishName": "Thai Binh",
@@ -198,7 +207,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C54ZSQ99EB5GPWBWTHTE",
+    "Id": "01JF23H3NMQE0DADZ83CVW00XW",
     "Code": "35",
     "Name": "Hà Nam",
     "EnglishName": "Ha Nam",
@@ -207,7 +216,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5544JTFE0XB6JXRY3X6",
+    "Id": "01JF23H3NNQCJ0ECNEJZ79A6B3",
     "Code": "36",
     "Name": "Nam Định",
     "EnglishName": "Nam Dinh",
@@ -216,7 +225,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C55D1DPZZFQJMKMN7XBD",
+    "Id": "01JF23H3NR3XNAVD16JYZZ3XSX",
     "Code": "37",
     "Name": "Ninh Bình",
     "EnglishName": "Ninh Binh",
@@ -225,7 +234,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C55KKWBQ6F7RRPBF978W",
+    "Id": "01JF23H3NTBKE2AYGG7W8E807G",
     "Code": "38",
     "Name": "Thanh Hóa",
     "EnglishName": "Thanh Hoa",
@@ -234,7 +243,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C56QY7VBDKMYVE31TCKN",
+    "Id": "01JF23H3P527Z6MCKC3EAXJ6QN",
     "Code": "40",
     "Name": "Nghệ An",
     "EnglishName": "Nghe An",
@@ -243,7 +252,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C57FFKMXE57BGBTHEKP9",
+    "Id": "01JF23H3PBX6YWTDS5Y28RYW2X",
     "Code": "42",
     "Name": "Hà Tĩnh",
     "EnglishName": "Ha Tinh",
@@ -252,7 +261,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C57XX37QA18DK9HT8FJQ",
+    "Id": "01JF23H3PG4P7EPP1GG4YPS227",
     "Code": "44",
     "Name": "Quảng Bình",
     "EnglishName": "Quang Binh",
@@ -261,7 +270,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5845BWDRWZ89DMQTFYC",
+    "Id": "01JF23H3PJFPHQ7Z8PAH85P5VW",
     "Code": "45",
     "Name": "Quảng Trị",
     "EnglishName": "Quang Tri",
@@ -270,7 +279,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C58929TPS9QV3H56QZS7",
+    "Id": "01JF23H3PMT7R9THYZ73JT8KDQ",
     "Code": "46",
     "Name": "Huế",
     "EnglishName": "Hue",
@@ -279,7 +288,7 @@
     "AdministrativeUnitId": "1"
   },
   {
-    "Id": "01JF22C58F4G22Z6VXHRZX6DPB",
+    "Id": "01JF23H3PQB4VS9FCCTD7XTXPT",
     "Code": "48",
     "Name": "Đà Nẵng",
     "EnglishName": "Da Nang",
@@ -288,7 +297,7 @@
     "AdministrativeUnitId": "1"
   },
   {
-    "Id": "01JF22C58JN5A2JRCYMHF2ZWVB",
+    "Id": "01JF23H3PQNYFCQ0M2PVJK4EAN",
     "Code": "49",
     "Name": "Quảng Nam",
     "EnglishName": "Quang Nam",
@@ -297,7 +306,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C58XTCH7CVJA3NREXDM4",
+    "Id": "01JF23H3PTQ031A1Z104JNK69B",
     "Code": "51",
     "Name": "Quảng Ngãi",
     "EnglishName": "Quang Ngai",
@@ -306,7 +315,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C597VHNSWKWZ7KM2DC88",
+    "Id": "01JF23H3PWTCY7J5VK8RMWCK24",
     "Code": "52",
     "Name": "Bình Định",
     "EnglishName": "Binh Dinh",
@@ -315,7 +324,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C59HVRE6ED0B4P6KJ0AN",
+    "Id": "01JF23H3Q0NHBYRDT04V2CMJKD",
     "Code": "54",
     "Name": "Phú Yên",
     "EnglishName": "Phu Yen",
@@ -324,7 +333,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C59RCH7HM3H1EGBZCY1E",
+    "Id": "01JF23H3Q11KP7JFBEVENF9RQD",
     "Code": "56",
     "Name": "Khánh Hòa",
     "EnglishName": "Khanh Hoa",
@@ -333,7 +342,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C59X3D8BAGV0FQG6YZRQ",
+    "Id": "01JF23H3Q3Q6WGPA5C8H1XDJTQ",
     "Code": "58",
     "Name": "Ninh Thuận",
     "EnglishName": "Ninh Thuan",
@@ -342,7 +351,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5A0Z4WSP653P6CM74Q6",
+    "Id": "01JF23H3Q4KNRW5YVMHZZ6ZKCE",
     "Code": "60",
     "Name": "Bình Thuận",
     "EnglishName": "Binh Thuan",
@@ -351,7 +360,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5A6P513S1BSFHPF5RAX",
+    "Id": "01JF23H3Q59YF975WC09QZJBZF",
     "Code": "62",
     "Name": "Kon Tum",
     "EnglishName": "Kon Tum",
@@ -360,7 +369,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5ABP533W0KAMRP6AVRA",
+    "Id": "01JF23H3Q7QGYMTQGV568KTYRF",
     "Code": "64",
     "Name": "Gia Lai",
     "EnglishName": "Gia Lai",
@@ -369,7 +378,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5ANP2MCG2Y86NZZG8YW",
+    "Id": "01JF23H3QAY4HDSRBX4F80F2FC",
     "Code": "66",
     "Name": "Đắk Lắk",
     "EnglishName": "Dak Lak",
@@ -378,7 +387,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5AW7W4Q8HKS7A1BT98H",
+    "Id": "01JF23H3QCBF4PJDY931828T47",
     "Code": "67",
     "Name": "Đắk Nông",
     "EnglishName": "Dak Nong",
@@ -387,7 +396,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5AZ988S0Q134Y6PSNAY",
+    "Id": "01JF23H3QDN2N5FRMBBQYM3YM2",
     "Code": "68",
     "Name": "Lâm Đồng",
     "EnglishName": "Lam Dong",
@@ -396,7 +405,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5B6399BA82PF4WA9W08",
+    "Id": "01JF23H3QGPFT6BJXSW0ZD46HD",
     "Code": "70",
     "Name": "Bình Phước",
     "EnglishName": "Binh Phuoc",
@@ -405,7 +414,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5BA11CYC770BW9B5W1X",
+    "Id": "01JF23H3QHV5BR9BZ4S1TMS0DH",
     "Code": "72",
     "Name": "Tây Ninh",
     "EnglishName": "Tay Ninh",
@@ -414,7 +423,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5BDT6CAJ2N3A6VT2V10",
+    "Id": "01JF23H3QK68T295WPXKNGD4QY",
     "Code": "74",
     "Name": "Bình Dương",
     "EnglishName": "Binh Duong",
@@ -423,7 +432,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5BH0S6P3BKYSVFVF0RD",
+    "Id": "01JF23H3QMMVNKM19CER225FJJ",
     "Code": "75",
     "Name": "Đồng Nai",
     "EnglishName": "Dong Nai",
@@ -432,7 +441,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5BS5R521XZPEHEZRVEK",
+    "Id": "01JF23H3QPET7YRP41Q008JFPS",
     "Code": "77",
     "Name": "Bà Rịa - Vũng Tàu",
     "EnglishName": "Ba Ria - Vung Tau",
@@ -441,7 +450,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5BWJEGJFHB6C5Z0MXNN",
+    "Id": "01JF23H3QQFCW7JRVJ8ZZQKXKA",
     "Code": "79",
     "Name": "Hồ Chí Minh",
     "EnglishName": "Ho Chi Minh",
@@ -451,7 +460,7 @@
     "AdministrativeUnitId": "1"
   },
   {
-    "Id": "01JF22C5CEHHA0BWD6PKENYT1M",
+    "Id": "01JF23H3QV2VZESN54PM0SB2ZG",
     "Code": "80",
     "Name": "Long An",
     "EnglishName": "Long An",
@@ -460,7 +469,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5CPQJE5VCTTRG9KN7S3",
+    "Id": "01JF23H3QXQN2Z1X45FRD7VQ9R",
     "Code": "82",
     "Name": "Tiền Giang",
     "EnglishName": "Tien Giang",
@@ -469,7 +478,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5CWAEE0KAACK91Q01PP",
+    "Id": "01JF23H3R16TSJ4D0QZDEKP4BJ",
     "Code": "83",
     "Name": "Bến Tre",
     "EnglishName": "Ben Tre",
@@ -478,7 +487,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5D1KWGPHHDT2NAG833Z",
+    "Id": "01JF23H3R3P1HYVEBSMYMGMJ92",
     "Code": "84",
     "Name": "Trà Vinh",
     "EnglishName": "Tra Vinh",
@@ -487,7 +496,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5D5A0EGMB5EYJYNW1J0",
+    "Id": "01JF23H3R4SAEZC2YZ257VPRV1",
     "Code": "86",
     "Name": "Vĩnh Long",
     "EnglishName": "Vinh Long",
@@ -496,7 +505,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5D93VTT6CT96XY5C8E7",
+    "Id": "01JF23H3R5HVEG7FZCSKA5SANV",
     "Code": "87",
     "Name": "Đồng Tháp",
     "EnglishName": "Dong Thap",
@@ -505,7 +514,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5DEA8546VAAXM0VYD47",
+    "Id": "01JF23H3R73HKYH1YQ734A84HQ",
     "Code": "89",
     "Name": "An Giang",
     "EnglishName": "An Giang",
@@ -514,7 +523,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5DKMQSFAW0E8XQ6XXXF",
+    "Id": "01JF23H3R9T7WXKWCJYDTMVDXH",
     "Code": "91",
     "Name": "Kiên Giang",
     "EnglishName": "Kien Giang",
@@ -523,7 +532,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5DSE08J8HPRWJV64SK1",
+    "Id": "01JF23H3RBAXM7DRM0RCNPJSVR",
     "Code": "92",
     "Name": "Cần Thơ",
     "EnglishName": "Can Tho",
@@ -532,7 +541,7 @@
     "AdministrativeUnitId": "1"
   },
   {
-    "Id": "01JF22C5DWHRMQJYXH0FSAAMED",
+    "Id": "01JF23H3RCK8GYS73FKN0F395G",
     "Code": "93",
     "Name": "Hậu Giang",
     "EnglishName": "Hau Giang",
@@ -541,7 +550,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5DYK90NSB182GARR8DX",
+    "Id": "01JF23H3RD36X44GPJ9WKBAT5M",
     "Code": "94",
     "Name": "Sóc Trăng",
     "EnglishName": "Soc Trang",
@@ -550,7 +559,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5E23PYR8RVR1PB7W8EN",
+    "Id": "01JF23H3RFYCDC4XFPJTD00CDS",
     "Code": "95",
     "Name": "Bạc Liêu",
     "EnglishName": "Bac Lieu",
@@ -559,7 +568,7 @@
     "AdministrativeUnitId": "2"
   },
   {
-    "Id": "01JF22C5E4AG2R6SQB59MNZ34V",
+    "Id": "01JF23H3RJH1S16DYFW9H9P4ZH",
     "Code": "96",
     "Name": "Cà Mau",
     "EnglishName": "Ca Mau",

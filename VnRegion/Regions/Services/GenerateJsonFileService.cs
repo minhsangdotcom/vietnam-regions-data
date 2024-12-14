@@ -164,140 +164,80 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         List<Ward>? wards = null
     )
     {
-        string result = string.Empty;
-        switch (true)
+        if (string.IsNullOrWhiteSpace(tableName))
+            return string.Empty;
+
+        var tableMapping = new Dictionary<string, (dynamic Config, dynamic Data)?>
         {
-            case bool when tableName == nameConfigurations.ProvinceConfigs!.TableName:
-                Dictionary<string, string> propertyNames = nameConfigurations
-                    .ProvinceConfigs!
-                    .ColumnNames;
+            {
+                nameConfigurations.ProvinceConfigs!.TableName!,
+                new(nameConfigurations.ProvinceConfigs, provinces!)
+            },
+            {
+                nameConfigurations.DistrictConfigs!.TableName!,
+                new(nameConfigurations.DistrictConfigs, districts!)
+            },
+            {
+                nameConfigurations.WardConfigs!.TableName!,
+                new(nameConfigurations.WardConfigs, wards!)
+            },
+        };
 
-                JsonArray provinceJson = [];
+        if (
+            !tableMapping.TryGetValue(tableName, out var mapping)
+            || mapping == null
+            || mapping.Value.Data == null
+        )
+            return string.Empty;
 
-                foreach (var province in provinces!)
-                {
-                    JsonObject obj = [];
-
-                    foreach (var propertyInfo in province.GetType().GetProperties())
-                    {
-                        string? propertyName =
-                            propertyNames.GetValueOrDefault(propertyInfo.Name) ?? propertyInfo.Name;
-
-                        if (
-                            string.IsNullOrWhiteSpace(propertyName)
-                            || propertyName == nameof(BaseEntity.CreatedAt)
-                        )
-                        {
-                            continue;
-                        }
-
-                        if (propertyName == nameof(Province.CustomName))
-                        {
-                            string? customName = propertyInfo.GetValue(province, null)?.ToString();
-
-                            if (customName != null)
-                            {
-                                obj[$"{propertyName}"] = $"{propertyInfo.GetValue(province, null)}";
-                            }
-
-                            continue;
-                        }
-
-                        obj[$"{propertyName}"] = $"{propertyInfo.GetValue(province, null)}";
-                    }
-
-                    provinceJson.Add(obj);
-                }
-                result = SerializerExtension.Serialize(provinceJson).StringJson;
-                break;
-            case bool when tableName == nameConfigurations.DistrictConfigs!.TableName:
-                JsonArray districtJson = [];
-                foreach (var district in districts!)
-                {
-                    JsonObject obj = [];
-
-                    foreach (var propertyInfo in district.GetType().GetProperties())
-                    {
-                        string? propertyName =
-                            nameConfigurations.DistrictConfigs!.ColumnNames.GetValueOrDefault(
-                                propertyInfo.Name
-                            ) ?? propertyInfo.Name;
-
-                        if (
-                            string.IsNullOrWhiteSpace(propertyName)
-                            || propertyName == nameof(BaseEntity.CreatedAt)
-                        )
-                        {
-                            continue;
-                        }
-
-                        if (propertyName == nameof(District.CustomName))
-                        {
-                            string? customName = propertyInfo.GetValue(district, null)?.ToString();
-
-                            if (customName != null)
-                            {
-                                obj[$"{propertyName}"] = $"{propertyInfo.GetValue(district, null)}";
-                            }
-
-                            continue;
-                        }
-
-                        obj[$"{propertyName}"] = $"{propertyInfo.GetValue(district, null)}";
-                    }
-
-                    districtJson.Add(obj);
-                }
-                result = SerializerExtension.Serialize(districtJson).StringJson;
-                break;
-            case bool when tableName == nameConfigurations.WardConfigs!.TableName:
-                JsonArray wardJson = [];
-                foreach (var ward in wards!)
-                {
-                    JsonObject obj = [];
-
-                    foreach (var propertyInfo in ward.GetType().GetProperties())
-                    {
-                        string? propertyName =
-                            nameConfigurations.WardConfigs!.ColumnNames.GetValueOrDefault(
-                                propertyInfo.Name
-                            ) ?? propertyInfo.Name;
-
-                        if (
-                            string.IsNullOrWhiteSpace(propertyName)
-                            || propertyName == nameof(BaseEntity.CreatedAt)
-                        )
-                        {
-                            continue;
-                        }
-
-                        if (propertyName == nameof(Ward.CustomName))
-                        {
-                            string? customName = propertyInfo.GetValue(ward, null)?.ToString();
-
-                            if (customName != null)
-                            {
-                                obj[$"{propertyName}"] = $"{propertyInfo.GetValue(ward, null)}";
-                            }
-
-                            continue;
-                        }
-
-                        obj[$"{propertyName}"] = $"{propertyInfo.GetValue(ward, null)}";
-                    }
-
-                    wardJson.Add(obj);
-                }
-                result = SerializerExtension.Serialize(wardJson).StringJson;
-                break;
-            default:
-                break;
-        }
-
-        return result;
+        // Serialize based on configuration
+        var (config, data) = mapping!.Value;
+        return SerializeEntities(config.ColumnNames, data);
     }
 
-    private DataChanges HasChangeData(
+    private static string SerializeEntities<T>(
+        Dictionary<string, string> columnNames,
+        List<T> entities
+    )
+    {
+        var jsonArray = new JsonArray();
+
+        foreach (var entity in entities)
+        {
+            var jsonObject = new JsonObject();
+
+            foreach (var propertyInfo in typeof(T).GetProperties())
+            {
+                string? propertyName =
+                    columnNames.GetValueOrDefault(propertyInfo.Name) ?? propertyInfo.Name;
+
+                if (
+                    string.IsNullOrWhiteSpace(propertyName)
+                    || propertyName == nameof(BaseEntity.CreatedAt)
+                )
+                    continue;
+
+                if (propertyName == nameof(Region.CustomName))
+                {
+                    var customName = propertyInfo.GetValue(entity)?.ToString();
+                    if (!string.IsNullOrEmpty(customName))
+                    {
+                        jsonObject[propertyName] = customName;
+                    }
+                    continue;
+                }
+
+                // Add other properties
+                jsonObject[propertyName] = propertyInfo.GetValue(entity)?.ToString();
+            }
+
+            jsonArray.Add(jsonObject);
+        }
+
+        return SerializerExtension.Serialize(jsonArray).StringJson;
+    }
+
+    private static DataChanges HasChangeData(
         IEnumerable<ExcelRegionModel> sourceFile,
         IEnumerable<ExcelRegionModel> updatedFile
     )
@@ -308,7 +248,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         return new DataChanges { WardChanges = wardChanges, DistrictChanges = districtChanges };
     }
 
-    private List<WardChange> WardChanges(
+    private static List<WardChange> WardChanges(
         IEnumerable<ExcelRegionModel> sourceFile,
         IEnumerable<ExcelRegionModel> updatedFile
     )
@@ -430,7 +370,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         return [.. wardChanges];
     }
 
-    private List<DistrictChange> DistrictChanges(
+    private static List<DistrictChange> DistrictChanges(
         IEnumerable<ExcelRegionModel> sourceFile,
         IEnumerable<ExcelRegionModel> updatedFile
     )
