@@ -11,6 +11,8 @@ public class GenerateResponse
     public RegionMetaData? DistrictMetaData { get; set; }
 
     public RegionMetaData? WardMetaData { get; set; }
+
+    public RegionMetaData? AdministrativeUnitData { get; set; }
 }
 
 public class RegionMetaData

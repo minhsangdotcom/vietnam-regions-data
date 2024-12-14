@@ -99,6 +99,90 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             x.DistrictId = districts.Find(p => p.Code == x.DistrictCode)?.Id;
         });
 
+        List<AdministrativeUnit> administrativeUnits =
+        [
+            new()
+            {
+                Id = 1,
+                FullName = "Thành phố trực thuộc trung ương",
+                EnglishFullName = "Municipality",
+                ShortName = "Thành phố",
+                EnglishShortName = "City",
+            },
+            new()
+            {
+                Id = 2,
+                FullName = "Tỉnh",
+                EnglishFullName = "Province",
+                ShortName = "Tỉnh",
+                EnglishShortName = "Province",
+            },
+            new()
+            {
+                Id = 3,
+                FullName = "Thành phố thuộc thành phố trực thuộc trung ương",
+                EnglishFullName = "Municipal city",
+                ShortName = "Thành phố",
+                EnglishShortName = "City",
+            },
+            new()
+            {
+                Id = 4,
+                FullName = "Thành phố thuộc tỉnh",
+                EnglishFullName = "Provincial city",
+                ShortName = "Thành phố",
+                EnglishShortName = "City",
+            },
+            new()
+            {
+                Id = 5,
+                FullName = "Quận",
+                EnglishFullName = "Urban district",
+                ShortName = "Quận",
+                EnglishShortName = "District",
+            },
+            new()
+            {
+                Id = 6,
+                FullName = "Thị xã",
+                EnglishFullName = "District-level town",
+                ShortName = "Thị xã",
+                EnglishShortName = "Town",
+            },
+            new()
+            {
+                Id = 7,
+                FullName = "Huyện",
+                EnglishFullName = "District",
+                ShortName = "Huyện",
+                EnglishShortName = "District",
+            },
+            new()
+            {
+                Id = 8,
+                FullName = "Phường",
+                EnglishFullName = "Ward",
+                ShortName = "Phường",
+                EnglishShortName = "Ward",
+            },
+            new()
+            {
+                Id = 9,
+                FullName = "Thị trấn",
+                EnglishFullName = "Commune-level town",
+                ShortName = "Thị trấn",
+                EnglishShortName = "Township",
+            },
+            new()
+            {
+                Id = 10,
+                FullName = "Xã",
+                EnglishFullName = "Commune",
+                ShortName = "Xã",
+                EnglishShortName = "Commune",
+            },
+        ];
+
         string strProvinces =
             nameConfigurations.ProvinceConfigs == null
                 ? SerializerExtension.Serialize(provines).StringJson
@@ -117,19 +201,30 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                 ? SerializerExtension.Serialize(wards).StringJson
                 : SerializeCustomName(nameConfigurations.WardConfigs!.TableName!, wards: wards);
 
+        string strAdministrativeUnits =
+            nameConfigurations.AdministrativeUnitConfigs == null
+                ? SerializerExtension.Serialize(administrativeUnits).StringJson
+                : SerializeCustomName(
+                    nameConfigurations.AdministrativeUnitConfigs!.TableName!,
+                    administrativeUnits: administrativeUnits
+                );
+
         string provincePath = Path.Combine(path, "Provinces.json");
         string districtPath = Path.Combine(path, "Districts.json");
         string wardPath = Path.Combine(path, "Wards.json");
+        string adminPath = Path.Combine(path, "AdministrativeUnits.json");
 
         File.WriteAllText(provincePath, strProvinces);
         File.WriteAllText(districtPath, strDistricts);
         File.WriteAllText(wardPath, strWards);
+        File.WriteAllText(adminPath, strAdministrativeUnits);
 
         return new()
         {
             ProvinceMetaData = new() { Path = provincePath, Total = provines.Count },
             DistrictMetaData = new() { Path = districtPath, Total = districts.Count },
             WardMetaData = new() { Path = wardPath, Total = wards.Count },
+            AdministrativeUnitData = new() { Path = adminPath, Total = administrativeUnits.Count },
         };
     }
 
@@ -137,7 +232,8 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         string tableName,
         List<Province>? provinces = null,
         List<District>? districts = null,
-        List<Ward>? wards = null
+        List<Ward>? wards = null,
+        List<AdministrativeUnit>? administrativeUnits = null
     )
     {
         if (string.IsNullOrWhiteSpace(tableName))
@@ -156,6 +252,10 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             {
                 nameConfigurations.WardConfigs!.TableName!,
                 new(nameConfigurations.WardConfigs, wards!)
+            },
+            {
+                nameConfigurations.AdministrativeUnitConfigs!.TableName!,
+                new(nameConfigurations.AdministrativeUnitConfigs, administrativeUnits!)
             },
         };
 

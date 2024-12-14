@@ -8,6 +8,8 @@ public class NameConfigurationSettings
 
     public Name? WardConfigs { get; set; }
 
+    public Name? AdministrativeUnitConfigs { get; set; }
+
     public string? DbSetting { get; set; }
 }
 

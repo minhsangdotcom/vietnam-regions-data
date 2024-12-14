@@ -218,7 +218,12 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
 
     private string UnitSqlGenertation()
     {
-        return $"INSERT INTO {nameof(AdministrativeUnit).ToSnakeCase()} {GenerationHelper.Get(dbsetting: nameConfigurations.DbSetting!, new AdministrativeUnit(), isUnderscoreLower: true)} VALUES\r\n\t"
+        string tableName =
+            nameConfigurations.AdministrativeUnitConfigs == null
+                ? nameof(AdministrativeUnit).ToSnakeCase()
+                : nameConfigurations.AdministrativeUnitConfigs!.TableName!;
+
+        return $"INSERT INTO {tableName} (\"{nameof(AdministrativeUnit.FullName).ToSnakeCase()}\",{nameof(AdministrativeUnit.EnglishFullName).ToSnakeCase()}\",\"{nameof(AdministrativeUnit.ShortName).ToSnakeCase()}\",\"{nameof(AdministrativeUnit.EnglishShortName).ToSnakeCase()}\",\"{nameof(AdministrativeUnit.Id).ToSnakeCase()}\", \"{nameof(AdministrativeUnit.CreatedAt).ToSnakeCase()}\") VALUES\r\n\t"
             + $"('Thành phố trực thuộc trung ương','Municipality','Thành phố','City',1,null),\r\n\t"
             + $"('Tỉnh','Province','Tỉnh','Province',2,null),\r\n\t"
             + $"('Thành phố thuộc thành phố trực thuộc trung ương','Municipal city','Thành phố','City',3,null),\r\n\t"
