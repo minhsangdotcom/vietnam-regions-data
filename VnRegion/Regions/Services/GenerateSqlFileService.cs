@@ -34,9 +34,12 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
         string path = output ?? RegionName.OutputPath;
         Directory.CreateDirectory(path);
 
-        string provinceSql = ProvinceSqlGeneration(sourceFileRows);
-        string districtSql = DistrictSqlGeneration(sourceFileRows);
-        string wardSql = WardSqlGeneration(sourceFileRows);
+        (string provinceSql, List<Province> provinces) = ProvinceSqlGeneration(sourceFileRows);
+        (string districtSql, List<District> districts) = DistrictSqlGeneration(
+            sourceFileRows,
+            provinces
+        );
+        string wardSql = WardSqlGeneration(sourceFileRows, districts);
         string unitInsert = UnitSqlGenertation();
         string result =
             unitInsert + "\n\n" + provinceSql + "\n \n" + districtSql + "\n\n" + wardSql;
@@ -52,7 +55,9 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
         return new() { SqlGenerationPath = fullPath };
     }
 
-    private string ProvinceSqlGeneration(IEnumerable<ExcelRegionModel> sourceFileRows)
+    private SqlGenerationResponse<Province> ProvinceSqlGeneration(
+        IEnumerable<ExcelRegionModel> sourceFileRows
+    )
     {
         List<Province> provines = RegionMapping.MapFromIEnumrableExcelModelToListProvince(
             sourceFileRows.Where(x => x.ProvinceCode != null).DistinctBy(x => x.ProvinceCode)
@@ -60,7 +65,7 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
 
         string provinceTableName =
             nameConfigurations.ProvinceConfigs == null
-                ? nameof(Province).ToSnakeCase()
+                ? nameof(Province)
                 : nameConfigurations.ProvinceConfigs!.TableName!;
         string provinceColumNames =
             nameConfigurations.ProvinceConfigs == null
@@ -83,7 +88,7 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
                 );
 
         string provinceSql =
-            @$"INSERT INTO {provinceTableName} " + provinceColumNames + " VALUES\n";
+            @$"INSERT INTO {provinceTableName.ToSnakeCase()} " + provinceColumNames + " VALUES\n";
         foreach (Province province in provines)
         {
             provinceSql += "\t" + $"(";
@@ -95,14 +100,17 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
             provinceSql += ")," + "\n";
         }
 
-        return provinceSql.Remove(provinceSql.Length - 2, 2) + ";";
+        return new(provinceSql.Remove(provinceSql.Length - 2, 2) + ";", provines);
     }
 
-    private string DistrictSqlGeneration(IEnumerable<ExcelRegionModel> sourceFileRows)
+    private SqlGenerationResponse<District> DistrictSqlGeneration(
+        IEnumerable<ExcelRegionModel> sourceFileRows,
+        List<Province> provinces
+    )
     {
         string districtTableName =
             nameConfigurations.DistrictConfigs == null
-                ? nameof(District).ToSnakeCase()
+                ? nameof(District)
                 : nameConfigurations.DistrictConfigs!.TableName!;
         string districtColumNames =
             nameConfigurations.DistrictConfigs == null
@@ -120,7 +128,8 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
         List<District> districts = RegionMapping.MapFromIEnumrableExcelModelToListDistrict(
             sourceFileRows
                 .Where(x => x.DistrictCode != null)
-                .DistinctBy(x => new { x.DistrictCode, x.ProvinceCode })
+                .DistinctBy(x => new { x.DistrictCode, x.ProvinceCode }),
+            provinces
         );
 
         IEnumerable<PropertyInfo?> propertyInfos =
@@ -131,7 +140,7 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
                 );
 
         string districtSql =
-            @$"INSERT INTO {districtTableName} " + districtColumNames + " VALUES\n";
+            @$"INSERT INTO {districtTableName.ToSnakeCase()} " + districtColumNames + " VALUES\n";
         foreach (District district in districts)
         {
             districtSql += "\t" + $"(";
@@ -144,20 +153,24 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
             districtSql += ")," + "\n";
         }
 
-        return districtSql.Remove(districtSql.Length - 2, 2) + ";";
+        return new(districtSql.Remove(districtSql.Length - 2, 2) + ";", districts);
     }
 
-    private string WardSqlGeneration(IEnumerable<ExcelRegionModel> currentFileRows)
+    private string WardSqlGeneration(
+        IEnumerable<ExcelRegionModel> currentFileRows,
+        IEnumerable<District> districts
+    )
     {
         List<Ward> wards = RegionMapping.MapFromIEnumrableExcelModelToListWard(
             currentFileRows
                 .Where(x => x.WardCode != null)
-                .DistinctBy(x => new { x.WardCode, x.DistrictCode })
+                .DistinctBy(x => new { x.WardCode, x.DistrictCode }),
+            districts
         );
 
         string wardTableName =
             nameConfigurations.WardConfigs == null
-                ? nameof(Ward).ToSnakeCase()
+                ? nameof(Ward)
                 : nameConfigurations.WardConfigs!.TableName!;
         string wardColumNames =
             nameConfigurations.WardConfigs == null
@@ -187,14 +200,16 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
             var batch = wards.Skip(i).Take(batchSize);
 
             // Start a new INSERT statement
-            sqlBuilder.Append($"INSERT INTO {wardTableName} {wardColumNames} VALUES\n");
+            sqlBuilder.Append(
+                $"INSERT INTO {wardTableName.ToSnakeCase()} {wardColumNames} VALUES\n"
+            );
 
             foreach (Ward ward in batch)
             {
                 sqlBuilder.Append("\t(");
                 foreach (var accessor in propertyAccessors)
                 {
-                    var value = accessor(ward)?.ToString()?.Replace("'", "''"); // Escape single quotes
+                    var value = accessor(ward)?.ToString();
                     sqlBuilder.Append($"'{value}',");
                 }
                 sqlBuilder.Length--; // Remove trailing comma
@@ -220,10 +235,10 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
     {
         string tableName =
             nameConfigurations.AdministrativeUnitConfigs == null
-                ? nameof(AdministrativeUnit).ToSnakeCase()
+                ? nameof(AdministrativeUnit)
                 : nameConfigurations.AdministrativeUnitConfigs!.TableName!;
 
-        return $"INSERT INTO {tableName} (\"{nameof(AdministrativeUnit.FullName).ToSnakeCase()}\",{nameof(AdministrativeUnit.EnglishFullName).ToSnakeCase()}\",\"{nameof(AdministrativeUnit.ShortName).ToSnakeCase()}\",\"{nameof(AdministrativeUnit.EnglishShortName).ToSnakeCase()}\",\"{nameof(AdministrativeUnit.Id).ToSnakeCase()}\", \"{nameof(AdministrativeUnit.CreatedAt).ToSnakeCase()}\") VALUES\r\n\t"
+        return $"INSERT INTO {tableName.ToSnakeCase()} ({nameof(AdministrativeUnit.FullName).ToSnakeCase()},{nameof(AdministrativeUnit.EnglishFullName).ToSnakeCase()},{nameof(AdministrativeUnit.ShortName).ToSnakeCase()},{nameof(AdministrativeUnit.EnglishShortName).ToSnakeCase()},{nameof(AdministrativeUnit.Id).ToSnakeCase()}, {nameof(AdministrativeUnit.CreatedAt).ToSnakeCase()}) VALUES\r\n\t"
             + $"('Thành phố trực thuộc trung ương','Municipality','Thành phố','City',1,null),\r\n\t"
             + $"('Tỉnh','Province','Tỉnh','Province',2,null),\r\n\t"
             + $"('Thành phố thuộc thành phố trực thuộc trung ương','Municipal city','Thành phố','City',3,null),\r\n\t"
@@ -236,3 +251,5 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
             + $"('Xã','Commune','Xã','Commune',10,null);";
     }
 }
+
+public record SqlGenerationResponse<T>(string Sql, List<T> Data);

@@ -38,7 +38,10 @@ public class RegionMapping
         return [.. sources.Select(func)];
     }
 
-    public static District MapFromExcelModelToDistrict(ExcelRegionModel source)
+    public static District MapFromExcelModelToDistrict(
+        ExcelRegionModel source,
+        Ulid? provinceId = null
+    )
     {
         string fullName = source.District!.Contains('\'', StringComparison.CurrentCulture)
             ? source.District!.Insert(source.District.IndexOf('\'') + 1, "'")
@@ -70,6 +73,7 @@ public class RegionMapping
                     source.District!,
                     isCity ? RegionType.City : RegionType.Province
                 ),
+                ProvinceId = provinceId,
             };
 
         if (name!.All(x => char.IsDigit(x)))
@@ -81,14 +85,19 @@ public class RegionMapping
     }
 
     public static List<District> MapFromIEnumrableExcelModelToListDistrict(
-        IEnumerable<ExcelRegionModel> sources
+        IEnumerable<ExcelRegionModel> sources,
+        IEnumerable<Province>? provinces = null
     )
     {
-        static District func(ExcelRegionModel source) => MapFromExcelModelToDistrict(source);
+        District func(ExcelRegionModel source)
+        {
+            Ulid? provinceId = provinces?.FirstOrDefault(x => x.Code == source.ProvinceCode)?.Id;
+            return MapFromExcelModelToDistrict(source, provinceId);
+        }
         return [.. sources.Select(func)];
     }
 
-    public static Ward MapFromExcelModelToWard(ExcelRegionModel source)
+    public static Ward MapFromExcelModelToWard(ExcelRegionModel source, Ulid? districtId = null)
     {
         string? fullName = source.Ward!.Contains('\'', StringComparison.CurrentCulture)
             ? source.Ward.Insert(source.Ward.IndexOf('\'') + 1, "'")
@@ -113,6 +122,7 @@ public class RegionMapping
                 EnglishFullName = englishFullName,
                 DistrictCode = source.DistrictCode,
                 AdministrativeUnitId = GenerationHelper.GetAdministrativeUnits(source.Ward!),
+                DistrictId = districtId,
             };
 
         if (name.All(x => char.IsDigit(x)))
@@ -124,10 +134,15 @@ public class RegionMapping
     }
 
     public static List<Ward> MapFromIEnumrableExcelModelToListWard(
-        IEnumerable<ExcelRegionModel> sources
+        IEnumerable<ExcelRegionModel> sources,
+        IEnumerable<District>? districts = null
     )
     {
-        static Ward func(ExcelRegionModel source) => MapFromExcelModelToWard(source);
+        Ward func(ExcelRegionModel source)
+        {
+            Ulid? districtId = districts?.FirstOrDefault(x => x.Code == source.DistrictCode)?.Id;
+            return MapFromExcelModelToWard(source, districtId);
+        }
         return [.. sources.Select(func)];
     }
 

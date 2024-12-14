@@ -82,22 +82,14 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         List<District> districts = RegionMapping.MapFromIEnumrableExcelModelToListDistrict(
             sourceFileRows
                 .Where(x => x.DistrictCode != null)
-                .DistinctBy(x => new { x.DistrictCode, x.ProvinceCode })
+                .DistinctBy(x => new { x.DistrictCode, x.ProvinceCode }),
+            provines
         );
-
-        districts.ForEach(x =>
-        {
-            x.ProvinceId = provines.Find(p => p.Code == x.ProvinceCode)?.Id;
-        });
 
         List<Ward> wards = RegionMapping.MapFromIEnumrableExcelModelToListWard(
-            sourceFileRows.Where(x => x.WardCode != null).DistinctBy(x => x.WardCode)
+            sourceFileRows.Where(x => x.WardCode != null).DistinctBy(x => x.WardCode),
+            districts
         );
-
-        wards.ForEach(x =>
-        {
-            x.DistrictId = districts.Find(p => p.Code == x.DistrictCode)?.Id;
-        });
 
         List<AdministrativeUnit> administrativeUnits =
         [
