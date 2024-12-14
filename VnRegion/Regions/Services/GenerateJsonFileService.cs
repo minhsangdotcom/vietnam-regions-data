@@ -32,7 +32,6 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         string path = output ?? RegionName.OutputPath;
         Directory.CreateDirectory(path);
 
-        DataChanges? dataChanges = null;
         if (updatedFile != null)
         {
             using MemoryStream updatedFileStream = new();
@@ -41,7 +40,39 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             IEnumerable<ExcelRegionModel> updatedFileRows = MiniExcel.Query<ExcelRegionModel>(
                 updatedFileStream
             );
-            dataChanges = HasChangeData(sourceFileRows, updatedFileRows);
+            DataChanges dataChanges = HasChangeData(sourceFileRows, updatedFileRows);
+            string changesPath = Path.Combine(path, "Changes.json");
+            File.WriteAllText(changesPath, SerializerExtension.Serialize(dataChanges!).StringJson);
+
+            return new()
+            {
+                UpdateMetaData = new()
+                {
+                    Path = changesPath,
+                    WardSummaryUpdate = new()
+                    {
+                        AddedTotal =
+                            dataChanges?.WardChanges?.Count(x => x.Type == ChangeType.Addition)
+                            ?? 0,
+                        UpdatedTotal =
+                            dataChanges?.WardChanges?.Count(x => x.Type == ChangeType.Update) ?? 0,
+                        RemoveTotal =
+                            dataChanges?.WardChanges?.Count(x => x.Type == ChangeType.Delete) ?? 0,
+                    },
+                    DistrictSummaryUpdate = new()
+                    {
+                        AddedTotal =
+                            dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Addition)
+                            ?? 0,
+                        UpdatedTotal =
+                            dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Update)
+                            ?? 0,
+                        RemoveTotal =
+                            dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Delete)
+                            ?? 0,
+                    },
+                },
+            };
         }
 
         List<Province> provines = RegionMapping.MapFromIEnumrableExcelModelToListProvince(
@@ -68,28 +99,6 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             x.DistrictId = districts.Find(p => p.Code == x.DistrictCode)?.Id;
         });
 
-        dataChanges?.WardChanges?.ForEach(x =>
-        {
-            UpdateWard? updateWard = x.Update;
-
-            if (updateWard != null)
-            {
-                updateWard.DistrictId =
-                    districts.Find(p => p.Code == updateWard.DistrictCode)?.Id ?? Ulid.NewUlid();
-            }
-        });
-
-        dataChanges?.DistrictChanges?.ForEach(x =>
-        {
-            UpdateDistrict? updateDistrict = x.Update;
-            if (updateDistrict != null)
-            {
-                updateDistrict.ProvinceId = provines
-                    .Find(p => p.Code == updateDistrict.ProvinceCode)
-                    ?.Id;
-            }
-        });
-
         string strProvinces =
             nameConfigurations.ProvinceConfigs == null
                 ? SerializerExtension.Serialize(provines).StringJson
@@ -111,50 +120,17 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         string provincePath = Path.Combine(path, "Provinces.json");
         string districtPath = Path.Combine(path, "Districts.json");
         string wardPath = Path.Combine(path, "Wards.json");
-        string changesPath =
-            dataChanges == null ? string.Empty : Path.Combine(path, "Changes.json");
 
         File.WriteAllText(provincePath, strProvinces);
         File.WriteAllText(districtPath, strDistricts);
         File.WriteAllText(wardPath, strWards);
 
-        GenerateResponse response =
-            new()
-            {
-                ProvinceMetaData = new() { Path = provincePath, Total = provines.Count },
-                DistrictMetaData = new() { Path = districtPath, Total = districts.Count },
-                WardMetaData = new() { Path = wardPath, Total = wards.Count },
-            };
-
-        if (!string.IsNullOrWhiteSpace(changesPath))
+        return new()
         {
-            File.WriteAllText(changesPath, SerializerExtension.Serialize(dataChanges!).StringJson);
-            response.UpdateMetaData = new()
-            {
-                Path = changesPath,
-                WardSummaryUpdate = new()
-                {
-                    AddedTotal =
-                        dataChanges?.WardChanges?.Count(x => x.Type == ChangeType.Addition) ?? 0,
-                    UpdatedTotal =
-                        dataChanges?.WardChanges?.Count(x => x.Type == ChangeType.Update) ?? 0,
-                    RemoveTotal =
-                        dataChanges?.WardChanges?.Count(x => x.Type == ChangeType.Delete) ?? 0,
-                },
-                DistrictSummaryUpdate = new()
-                {
-                    AddedTotal =
-                        dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Addition)
-                        ?? 0,
-                    UpdatedTotal =
-                        dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Update) ?? 0,
-                    RemoveTotal =
-                        dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Delete) ?? 0,
-                },
-            };
-        }
-
-        return response;
+            ProvinceMetaData = new() { Path = provincePath, Total = provines.Count },
+            DistrictMetaData = new() { Path = districtPath, Total = districts.Count },
+            WardMetaData = new() { Path = wardPath, Total = wards.Count },
+        };
     }
 
     private string SerializeCustomName(
@@ -278,7 +254,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                 {
                     Code = addedWard.WardCode,
                     Old = null,
-                    New = RegionMapping.MapFromExcelModelToWard(addedWard),
+                    New = RegionMapping.MapFromExcelModelToUpdateWard(addedWard),
                     Type = ChangeType.Addition,
                     Update = RegionMapping.MapFromExcelModelToUpdateWard(addedWard),
                 }
@@ -292,7 +268,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                 {
                     Code = deletedWard.WardCode,
                     New = null,
-                    Old = RegionMapping.MapFromExcelModelToWard(deletedWard),
+                    Old = RegionMapping.MapFromExcelModelToUpdateWard(deletedWard),
                     Type = ChangeType.Delete,
                 }
             );
@@ -355,8 +331,8 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                             new WardChange()
                             {
                                 Code = uniqueKey,
-                                Old = RegionMapping.MapFromExcelModelToWard(oldRegion),
-                                New = RegionMapping.MapFromExcelModelToWard(newRegion),
+                                Old = RegionMapping.MapFromExcelModelToUpdateWard(oldRegion),
+                                New = RegionMapping.MapFromExcelModelToUpdateWard(newRegion),
                                 Type = ChangeType.Update,
                                 Changes = changes,
                                 Update = updateOld!,
@@ -405,7 +381,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                 {
                     Code = addedDistrict.WardCode,
                     Old = null,
-                    New = RegionMapping.MapFromExcelModelToDistrict(addedDistrict),
+                    New = RegionMapping.MapFromExcelModelToUpdateDistrict(addedDistrict),
                     Type = ChangeType.Addition,
                     Update = RegionMapping.MapFromExcelModelToUpdateDistrict(addedDistrict),
                 }
@@ -419,7 +395,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                 {
                     Code = deletedDistrict.WardCode,
                     New = null,
-                    Old = RegionMapping.MapFromExcelModelToDistrict(deletedDistrict),
+                    Old = RegionMapping.MapFromExcelModelToUpdateDistrict(deletedDistrict),
                     Type = ChangeType.Delete,
                 }
             );
@@ -482,8 +458,8 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                             new DistrictChange()
                             {
                                 Code = uniqueKey,
-                                Old = RegionMapping.MapFromExcelModelToDistrict(oldRegion),
-                                New = RegionMapping.MapFromExcelModelToDistrict(newRegion),
+                                Old = RegionMapping.MapFromExcelModelToUpdateDistrict(oldRegion),
+                                New = RegionMapping.MapFromExcelModelToUpdateDistrict(newRegion),
                                 Type = ChangeType.Update,
                                 Changes = changes,
                                 Update = updateOld!,

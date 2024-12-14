@@ -1,4 +1,4 @@
-using VnRegion.Regions.Entities;
+using System.Text.Json.Serialization;
 
 namespace VnRegion.Regions.Models;
 
@@ -13,9 +13,9 @@ public class WardChange
 {
     public string? Code { get; set; }
 
-    public Ward? Old { get; set; }
+    public UpdateWard? Old { get; set; }
 
-    public Ward? New { get; set; }
+    public UpdateWard? New { get; set; }
 
     public List<Change>? Changes { get; set; }
 
@@ -36,8 +36,6 @@ public class UpdateWard
 
     public string? EnglishFullName { get; set; }
 
-    public Ulid? DistrictId { get; set; }
-
     public string? DistrictCode { get; set; }
 
     public string? CustomName { get; set; }
@@ -49,9 +47,9 @@ public class DistrictChange
 {
     public string? Code { get; set; }
 
-    public District? Old { get; set; }
+    public UpdateDistrict? Old { get; set; }
 
-    public District? New { get; set; }
+    public UpdateDistrict? New { get; set; }
 
     public List<Change>? Changes { get; set; }
 
@@ -71,8 +69,6 @@ public class UpdateDistrict
     public string? FullName { get; set; }
 
     public string? EnglishFullName { get; set; }
-
-    public Ulid? ProvinceId { get; set; }
 
     public string? ProvinceCode { get; set; }
 
