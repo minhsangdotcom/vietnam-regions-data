@@ -222,4 +222,27 @@ public class RegionMapping
 
         return destination;
     }
+
+    public static UpdateProvince MapFromExcelModelToUpdateProvince(ExcelRegionModel source)
+    {
+        string name = GenerationHelper.GetShortName(source.Province!);
+        string enProvince = GenerationHelper.GetEnglishName(source.Province!);
+
+        UpdateProvince destination =
+            new()
+            {
+                Code = source.ProvinceCode,
+                FullName = source.Province,
+                Name = name.Trim(),
+                EnglishName = GenerationHelper.RemoveUnicode(name),
+                EnglishFullName = $"{GenerationHelper.RemoveUnicode(name)} " + enProvince,
+                AdministrativeUnitId = GenerationHelper.GetAdministrativeUnits(source.Province!),
+            };
+
+        if (name!.All(x => char.IsDigit(x)) || source.ProvinceCode == "79")
+        {
+            destination.CustomName = destination.FullName;
+        }
+        return destination;
+    }
 }

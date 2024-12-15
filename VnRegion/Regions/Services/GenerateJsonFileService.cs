@@ -71,6 +71,19 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
                             dataChanges?.DistrictChanges?.Count(x => x.Type == ChangeType.Delete)
                             ?? 0,
                     },
+
+                    ProvinceSummaryUpdate = new()
+                    {
+                        AddedTotal =
+                            dataChanges?.ProvinceChanges?.Count(x => x.Type == ChangeType.Addition)
+                            ?? 0,
+                        UpdatedTotal =
+                            dataChanges?.ProvinceChanges?.Count(x => x.Type == ChangeType.Update)
+                            ?? 0,
+                        RemoveTotal =
+                            dataChanges?.ProvinceChanges?.Count(x => x.Type == ChangeType.Delete)
+                            ?? 0,
+                    },
                 },
             };
         }
@@ -324,8 +337,14 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
     {
         List<WardChange> wardChanges = WardChanges(sourceFile, updatedFile);
         List<DistrictChange> districtChanges = DistrictChanges(sourceFile, updatedFile);
+        List<ProvinceChange> provinceChanges = ProvinceChanges(sourceFile, updatedFile);
 
-        return new DataChanges { WardChanges = wardChanges, DistrictChanges = districtChanges };
+        return new DataChanges
+        {
+            WardChanges = wardChanges,
+            DistrictChanges = districtChanges,
+            ProvinceChanges = provinceChanges,
+        };
     }
 
     private static List<WardChange> WardChanges(
@@ -483,7 +502,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             districtChanges.Add(
                 new DistrictChange
                 {
-                    Code = addedDistrict.WardCode,
+                    Code = addedDistrict.DistrictCode,
                     Old = null,
                     New = RegionMapping.MapFromExcelModelToUpdateDistrict(addedDistrict),
                     Type = ChangeType.Addition,
@@ -497,7 +516,7 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             districtChanges.Add(
                 new DistrictChange
                 {
-                    Code = deletedDistrict.WardCode,
+                    Code = deletedDistrict.DistrictCode,
                     New = null,
                     Old = RegionMapping.MapFromExcelModelToUpdateDistrict(deletedDistrict),
                     Type = ChangeType.Delete,
@@ -575,6 +594,116 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         );
 
         return [.. districtChanges];
+    }
+
+    private static List<ProvinceChange> ProvinceChanges(
+        IEnumerable<ExcelRegionModel> sourceFile,
+        IEnumerable<ExcelRegionModel> updatedFile
+    )
+    {
+        List<ProvinceChange> provinceChanges = [];
+        IEnumerable<string?> provincesInupdatedFile = updatedFile
+            .DistinctBy(x => x.ProvinceCode)
+            .Select(x => x.ProvinceCode)
+            .ToList();
+        IEnumerable<ExcelRegionModel> deletedProvinces = sourceFile
+            .DistinctBy(x => x.ProvinceCode)
+            .ExceptBy(provincesInupdatedFile, x => x.ProvinceCode);
+        IEnumerable<ExcelRegionModel> addedProvinces = updatedFile
+            .DistinctBy(x => x.ProvinceCode)
+            .ExceptBy(sourceFile.Select(x => x.ProvinceCode), x => x.ProvinceCode);
+        List<ExcelRegionModel> districtsToUpdate = sourceFile
+            .DistinctBy(x => x.ProvinceCode)
+            .IntersectBy(provincesInupdatedFile, x => x.ProvinceCode)
+            .ToList();
+
+        var updates = GetProviceUpdates(
+            districtsToUpdate,
+            updatedFile.DistinctBy(x => x.ProvinceCode)
+        );
+        provinceChanges.AddRange(updates);
+
+        foreach (ExcelRegionModel addedProvince in addedProvinces)
+        {
+            provinceChanges.Add(
+                new ProvinceChange
+                {
+                    Code = addedProvince.ProvinceCode,
+                    Old = null,
+                    New = RegionMapping.MapFromExcelModelToUpdateProvince(addedProvince),
+                    Type = ChangeType.Addition,
+                    Update = RegionMapping.MapFromExcelModelToUpdateProvince(addedProvince),
+                }
+            );
+        }
+
+        foreach (var deletedProvince in deletedProvinces)
+        {
+            provinceChanges.Add(
+                new ProvinceChange
+                {
+                    Code = deletedProvince.ProvinceCode,
+                    New = null,
+                    Old = RegionMapping.MapFromExcelModelToUpdateProvince(deletedProvince),
+                    Type = ChangeType.Delete,
+                }
+            );
+        }
+
+        return provinceChanges;
+    }
+
+    private static List<ProvinceChange> GetProviceUpdates(
+        IEnumerable<ExcelRegionModel> oldList,
+        IEnumerable<ExcelRegionModel> newList
+    )
+    {
+        var oldRegionDict = oldList.ToDictionary(r => r.ProvinceCode!, r => r);
+        var provinceChanges = new ConcurrentBag<ProvinceChange>();
+
+        foreach (ExcelRegionModel newRegion in newList)
+        {
+            string uniqueKey = newRegion.ProvinceCode!;
+
+            // Check if the region exists in the old list
+            if (oldRegionDict.TryGetValue(uniqueKey, out var oldRegion))
+            {
+                List<Change> changes = [];
+                // Compare properties that may change
+                if (oldRegion.Province != newRegion.Province)
+                {
+                    changes.Add(
+                        new()
+                        {
+                            Property = nameof(ExcelRegionModel.Province),
+                            Old = oldRegion.Province,
+                            Current = newRegion.Province,
+                        }
+                    );
+                }
+
+                if (changes.Count > 0)
+                {
+                    ExcelRegionModel update = oldRegion.Clone();
+                    UpdateProvince updateOld = RegionMapping.MapFromExcelModelToUpdateProvince(
+                        Update(changes, update)
+                    );
+                    provinceChanges.Add(
+                        new ProvinceChange()
+                        {
+                            Code = uniqueKey,
+                            Old = RegionMapping.MapFromExcelModelToUpdateProvince(oldRegion),
+                            New = RegionMapping.MapFromExcelModelToUpdateProvince(newRegion),
+                            Type = ChangeType.Update,
+                            Changes = changes,
+                            Update = updateOld!,
+                        }
+                    );
+                }
+            }
+        }
+
+        return [.. provinceChanges];
     }
 
     private static ExcelRegionModel Update(List<Change> changes, ExcelRegionModel update)

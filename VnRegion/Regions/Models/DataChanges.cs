@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace VnRegion.Regions.Models;
 
 public class DataChanges
@@ -7,6 +5,8 @@ public class DataChanges
     public List<WardChange>? WardChanges { get; set; }
 
     public List<DistrictChange>? DistrictChanges { get; set; }
+
+    public List<ProvinceChange>? ProvinceChanges { get; set; }
 }
 
 public class WardChange
@@ -71,6 +71,38 @@ public class UpdateDistrict
     public string? EnglishFullName { get; set; }
 
     public string? ProvinceCode { get; set; }
+
+    public string? CustomName { get; set; }
+
+    public int AdministrativeUnitId { get; set; }
+}
+
+public class ProvinceChange
+{
+    public string? Code { get; set; }
+
+    public UpdateProvince? Old { get; set; }
+
+    public UpdateProvince? New { get; set; }
+
+    public List<Change>? Changes { get; set; }
+
+    public UpdateProvince? Update { get; set; }
+
+    public ChangeType Type { get; set; }
+}
+
+public class UpdateProvince
+{
+    public string? Code { get; set; }
+
+    public string? Name { get; set; }
+
+    public string? EnglishName { get; set; }
+
+    public string? FullName { get; set; }
+
+    public string? EnglishFullName { get; set; }
 
     public string? CustomName { get; set; }
 
