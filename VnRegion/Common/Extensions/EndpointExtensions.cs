@@ -33,7 +33,7 @@ public static class EndpointExtensions
         foreach (var group in groupedEndpoints)
         {
             // Create a group route for each tag
-            var groupRouteBuilder = app.MapGroup(group.Key).WithOpenApi().WithTags(group.Key);
+            var groupRouteBuilder = app.MapGroup("").WithOpenApi().WithTags(group.Key);
 
             // Map all endpoints in the group
             foreach (IEndpoint endpoint in group)

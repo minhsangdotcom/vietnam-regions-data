@@ -12,13 +12,65 @@ public class GenerateJsonEndpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/regions/generateJson", Handle).DisableAntiforgery();
+        app.MapPost("api/regions/generateJson", Handle)
+            .AddEndpointFilter<ValidateGenerateJsonFileRequest>()
+            .ProducesValidationProblem()
+            .DisableAntiforgery();
     }
 
     public class GenerateJsonFileRequest
     {
         public IFormFile? File { get; set; }
         public IFormFile? UpdatedFile { get; set; }
+    }
+
+    public class ValidateGenerateJsonFileRequest : IEndpointFilter
+    {
+        public async ValueTask<object?> InvokeAsync(
+            EndpointFilterInvocationContext context,
+            EndpointFilterDelegate next
+        )
+        {
+            var request = context.GetArgument<GenerateJsonFileRequest>(0);
+            if (request == null)
+            {
+                return TypedResults.ValidationProblem(
+                    new Dictionary<string, string[]>()
+                    {
+                        { nameof(request.File), ["File is required"] },
+                    }
+                );
+            }
+
+            if (
+                request!.File!.ContentType
+                != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            {
+                return TypedResults.ValidationProblem(
+                    new Dictionary<string, string[]>()
+                    {
+                        { nameof(request.File), ["File must be xlsx type"] },
+                    }
+                );
+            }
+
+            if (
+                request.UpdatedFile != null
+                && request.UpdatedFile!.ContentType
+                    != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            {
+                return TypedResults.ValidationProblem(
+                    new Dictionary<string, string[]>()
+                    {
+                        { nameof(request.UpdatedFile), ["UpdatedFile must be xlsx type"] },
+                    }
+                );
+            }
+
+            return await next(context);
+        }
     }
 
     private static async Task<Ok<GenerateResponse>> Handle(
