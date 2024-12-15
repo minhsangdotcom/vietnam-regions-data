@@ -661,47 +661,50 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         var oldRegionDict = oldList.ToDictionary(r => r.ProvinceCode!, r => r);
         var provinceChanges = new ConcurrentBag<ProvinceChange>();
 
-        foreach (ExcelRegionModel newRegion in newList)
-        {
-            string uniqueKey = newRegion.ProvinceCode!;
-
-            // Check if the region exists in the old list
-            if (oldRegionDict.TryGetValue(uniqueKey, out var oldRegion))
+        Parallel.ForEach(
+            newList,
+            newRegion =>
             {
-                List<Change> changes = [];
-                // Compare properties that may change
-                if (oldRegion.Province != newRegion.Province)
-                {
-                    changes.Add(
-                        new()
-                        {
-                            Property = nameof(ExcelRegionModel.Province),
-                            Old = oldRegion.Province,
-                            Current = newRegion.Province,
-                        }
-                    );
-                }
+                string uniqueKey = newRegion.ProvinceCode!;
 
-                if (changes.Count > 0)
+                // Check if the region exists in the old list
+                if (oldRegionDict.TryGetValue(uniqueKey, out var oldRegion))
                 {
-                    ExcelRegionModel update = oldRegion.Clone();
-                    UpdateProvince updateOld = RegionMapping.MapFromExcelModelToUpdateProvince(
-                        Update(changes, update)
-                    );
-                    provinceChanges.Add(
-                        new ProvinceChange()
-                        {
-                            Code = uniqueKey,
-                            Old = RegionMapping.MapFromExcelModelToUpdateProvince(oldRegion),
-                            New = RegionMapping.MapFromExcelModelToUpdateProvince(newRegion),
-                            Type = ChangeType.Update,
-                            Changes = changes,
-                            Update = updateOld!,
-                        }
-                    );
+                    List<Change> changes = [];
+                    // Compare properties that may change
+                    if (oldRegion.Province != newRegion.Province)
+                    {
+                        changes.Add(
+                            new()
+                            {
+                                Property = nameof(ExcelRegionModel.Province),
+                                Old = oldRegion.Province,
+                                Current = newRegion.Province,
+                            }
+                        );
+                    }
+
+                    if (changes.Count > 0)
+                    {
+                        ExcelRegionModel update = oldRegion.Clone();
+                        UpdateProvince updateOld = RegionMapping.MapFromExcelModelToUpdateProvince(
+                            Update(changes, update)
+                        );
+                        provinceChanges.Add(
+                            new ProvinceChange()
+                            {
+                                Code = uniqueKey,
+                                Old = RegionMapping.MapFromExcelModelToUpdateProvince(oldRegion),
+                                New = RegionMapping.MapFromExcelModelToUpdateProvince(newRegion),
+                                Type = ChangeType.Update,
+                                Changes = changes,
+                                Update = updateOld!,
+                            }
+                        );
+                    }
                 }
             }
-        }
+        );
 
         return [.. provinceChanges];
     }
