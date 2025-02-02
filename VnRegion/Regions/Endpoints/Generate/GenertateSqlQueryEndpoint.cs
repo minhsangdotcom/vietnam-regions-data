@@ -31,7 +31,7 @@ public class GenertateSqlQueryEndpoint : IEndpoint
         )
         {
             var request = context.Arguments.OfType<GenerateSqlQueryFileRequest>().FirstOrDefault();
-            if (request != null)
+            if (request == null)
             {
                 return Results.Problem("File is required");
             }
