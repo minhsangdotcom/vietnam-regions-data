@@ -44,7 +44,7 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
         string result =
             unitInsert + "\n\n" + provinceSql + "\n \n" + districtSql + "\n\n" + wardSql;
 
-        string fullPath = Path.Combine(path, "sql_query.txt");
+        string fullPath = Path.Combine(path, "sql_query.sql");
         File.WriteAllText(fullPath, result);
 
         stopwatch.Stop();
