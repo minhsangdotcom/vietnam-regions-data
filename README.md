@@ -225,6 +225,8 @@ dotnet run
 
 Bước 3 : Đi tới thư mục Database và chạy file create_table.sql để tạo cấu trúc dữ liệu.
 
+**Swagger UI** http://localhost:8888/docs/index.html
+
 ### Hướng dẫn sử dụng
 
 Để có được file excel input thì mọi người truy cập vào [website](https://danhmuchanhchinh.gso.gov.vn/) hoặc mình có để ở thư mục [Inputs](/VnRegion/Inputs/).
@@ -323,13 +325,13 @@ Dữ liệu thay đổi sẽ có cấu trúc như sau
 
 **_changes_** : Thay đổi giữa dữ liệu cũ và mới.
 
-**_update_** : Dùng để thực thiện các logic update dữ liệu khi seed data.
+**_update_** : Dùng để update lại dữ liệu mới
 
 **_type_** : loại thay đổi với 1 là thêm mới, 2 là cập nhật, 3 là xóa
 
 Với vd là đoạn json trên thì phường (xã , thị trấn) có mã là 32002 có những thay đổi là từ phường 4 đổi thành phường 2.
 
-_Lưu ý là khi thực hiện logic cập nhật thì mọi người dùng changes property để update lại thay đổi nhé, những cái khác chỉ để mọi người preview thôi, mà nhớ là dùng code để tìm record thay vì id nhé. Với những quận,huyện đổi tình(thành phố) thì các bạn chịu khó dùng province code để tìm province id sau đó update lại khóa ngoại nhé, hoặc để đơn giản thì dùng code làm khóa chính thì sẽ dễ dàng hơn._
+_Lưu ý là khi thực hiện logic cập nhật thì mọi người dùng update property để cập nhật lại thay đổi nhé, những cái khác chỉ để mọi người preview thôi, mà nhớ là dùng code để tìm record thay vì id nhé. Với những quận,huyện đổi tình(thành phố) thì các bạn chịu khó dùng province code để tìm province id sau đó update lại khóa ngoại nhé, hoặc để đơn giản thì dùng code làm khóa chính thì sẽ dễ dàng hơn._
 
 Option 2 : Xuất file dữ liệu dưới dạng Sql file.
 
@@ -358,7 +360,7 @@ Những loại cở sở dữ liệu được hỗ trợ:
 
 **_Tùy chỉnh loại CSDL chỉ áp dụng cho xuất file dạng sql._**
 
-Tùy chỉnh tên table hoặc tên tên columns.
+Tùy chỉnh tên table hoặc tên columns.
 
 ```json
 "ProvinceConfigs": {
