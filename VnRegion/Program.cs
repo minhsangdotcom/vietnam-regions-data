@@ -1,5 +1,6 @@
 using System.Reflection;
 using VnRegion.Common.Extensions;
+using VnRegion.Regions.BackgroundJobs;
 using VnRegion.Regions.Services;
 using VnRegion.Regions.Settings;
 
@@ -20,6 +21,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddEndpoints(currentAssembly);
 builder.Services.AddSwaggerGen();
 builder.Services.AddAntiforgery();
+
+builder.Services.AddHostedService<DatabaseStructureGeneration>();
 
 var app = builder.Build();
 

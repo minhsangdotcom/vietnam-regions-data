@@ -14,9 +14,15 @@ using VnRegion.Regions.Settings;
 
 namespace VnRegion.Regions.Services;
 
-public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options) : IGenerate
+public class GenerateSqlFileService : IGenerate
 {
-    private readonly NameConfigurationSettings nameConfigurations = options.Value;
+    private readonly NameConfigurationSettings nameConfigurations;
+
+    public GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
+    {
+        nameConfigurations = options.Value;
+        nameConfigurations ??= new();
+    }
 
     public async Task<GenerateResponse> GenerateAsync(
         IFormFile sourceFile,
@@ -26,7 +32,7 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
     {
         Stopwatch stopwatch = new();
         stopwatch.Start();
-        Console.WriteLine("Starting generate......");
+        Console.WriteLine("Starting SQL file export......");
         using MemoryStream stream = new();
         await sourceFile!.CopyToAsync(stream);
 
@@ -49,7 +55,7 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
 
         stopwatch.Stop();
         await Console.Out.WriteLineAsync(
-            "Generated in " + stopwatch.ElapsedMilliseconds / 1000 + "s"
+            "Exporting has finished in " + stopwatch.ElapsedMilliseconds / 1000 + "s"
         );
 
         return new() { SqlGenerationPath = fullPath };
@@ -94,13 +100,21 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
             provinceSql += "\t" + $"(";
             foreach (PropertyInfo? propertyInfo in propertyInfos)
             {
-                provinceSql += $"'{propertyInfo?.GetValue(province, null)?.ToString()}',";
+                if (propertyInfo == null)
+                {
+                    continue;
+                }
+                provinceSql += GenerateValueSqlQuery(
+                    nameConfigurations.DbSetting!,
+                    propertyInfo,
+                    province
+                );
             }
-            provinceSql = provinceSql.Remove(provinceSql.Length - 1, 1);
+            provinceSql = provinceSql[..^1];
             provinceSql += ")," + "\n";
         }
 
-        return new(provinceSql.Remove(provinceSql.Length - 2, 2) + ";", provines);
+        return new(provinceSql[..^2] + ";", provines);
     }
 
     private SqlGenerationResponse<District> DistrictSqlGeneration(
@@ -146,14 +160,22 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
             districtSql += "\t" + $"(";
             foreach (PropertyInfo? propertyInfo in propertyInfos)
             {
-                districtSql += $"'{propertyInfo?.GetValue(district, null)?.ToString()}',";
+                if (propertyInfo == null)
+                {
+                    continue;
+                }
+                districtSql += GenerateValueSqlQuery(
+                    nameConfigurations.DbSetting!,
+                    propertyInfo,
+                    district
+                );
             }
 
-            districtSql = districtSql.Remove(districtSql.Length - 1, 1);
+            districtSql = districtSql[..^1];
             districtSql += ")," + "\n";
         }
 
-        return new(districtSql.Remove(districtSql.Length - 2, 2) + ";", districts);
+        return new(districtSql[..^2] + ";", districts);
     }
 
     private string WardSqlGeneration(
@@ -186,18 +208,27 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
                 );
         var propertyAccessors =
             nameConfigurations.WardConfigs == null
-                ? typeof(Ward).GetProperties().Select(p => CreatePropertyAccessor<Ward>(p))
-                : nameConfigurations
-                    .WardConfigs.ColumnNames.Keys.Select(key =>
-                        CreatePropertyAccessor<Ward>(typeof(Ward).GetProperty(key)!)
-                    )
-                    .ToList();
+                ? typeof(Ward)
+                    .GetProperties()
+                    .Select(p => new KeyValuePair<string, Func<Ward, object?>>(
+                        p.Name,
+                        CreatePropertyAccessor<Ward>(p)
+                    ))
+                :
+                [
+                    .. nameConfigurations.WardConfigs.ColumnNames.Keys.Select(
+                        key => new KeyValuePair<string, Func<Ward, object?>>(
+                            key,
+                            CreatePropertyAccessor<Ward>(typeof(Ward).GetProperty(key)!)
+                        )
+                    ),
+                ];
 
         const int batchSize = 1000;
         var sqlBuilder = new StringBuilder();
         for (int i = 0; i < wards.Count; i += batchSize)
         {
-            var batch = wards.Skip(i).Take(batchSize);
+            IEnumerable<Ward> batch = wards.Skip(i).Take(batchSize);
 
             // Start a new INSERT statement
             sqlBuilder.Append(
@@ -209,8 +240,28 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
                 sqlBuilder.Append("\t(");
                 foreach (var accessor in propertyAccessors)
                 {
-                    var value = accessor(ward)?.ToString();
-                    sqlBuilder.Append($"'{value}',");
+                    string propertyName = accessor.Key;
+                    string? value = accessor.Value(ward)?.ToString();
+
+                    string sqlValue = string.Empty;
+                    if (
+                        (
+                            propertyName == nameof(Region.FullName)
+                            || propertyName == nameof(Region.Name)
+                            || (
+                                propertyName == nameof(Region.CustomName)
+                                && !string.IsNullOrWhiteSpace(value)
+                            )
+                        )
+                        && (
+                            nameConfigurations.DbSetting == DbSettingName.SqlServer
+                            || nameConfigurations.DbSetting == DbSettingName.OracleSql
+                        )
+                    )
+                    {
+                        sqlValue += "N";
+                    }
+                    sqlBuilder.Append(sqlValue + $"'{value}',");
                 }
                 sqlBuilder.Length--; // Remove trailing comma
                 sqlBuilder.Append("),\n");
@@ -238,17 +289,42 @@ public class GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
                 ? nameof(AdministrativeUnit)
                 : nameConfigurations.AdministrativeUnitConfigs!.TableName!;
 
-        return $"INSERT INTO {tableName.ToSnakeCase()} ({nameof(AdministrativeUnit.FullName).ToSnakeCase()},{nameof(AdministrativeUnit.EnglishFullName).ToSnakeCase()},{nameof(AdministrativeUnit.ShortName).ToSnakeCase()},{nameof(AdministrativeUnit.EnglishShortName).ToSnakeCase()},{nameof(AdministrativeUnit.Id).ToSnakeCase()}, {nameof(AdministrativeUnit.CreatedAt).ToSnakeCase()}) VALUES\r\n\t"
-            + $"('Thành phố trực thuộc trung ương','Municipality','Thành phố','City',1,null),\r\n\t"
-            + $"('Tỉnh','Province','Tỉnh','Province',2,null),\r\n\t"
-            + $"('Thành phố thuộc thành phố trực thuộc trung ương','Municipal city','Thành phố','City',3,null),\r\n\t"
-            + $"('Thành phố thuộc tỉnh','Provincial city','Thành phố','City',4,null),\r\n\t"
-            + $"('Quận','Urban district','Quận','District',5,null),\r\n\t"
-            + $"('Thị xã','District-level town','Thị xã','Town',6,null),\r\n\t"
-            + $"('Huyện','District','Huyện','District',7,null),\r\n\t"
-            + $"('Phường','Ward','Phường','Ward',8,null),\r\n\t"
-            + $"('Thị trấn','Commune-level town','Thị trấn','Township',9,null),\r\n\t"
-            + $"('Xã','Commune','Xã','Commune',10,null);";
+        return $"INSERT INTO {tableName.ToSnakeCase()} ({nameof(AdministrativeUnit.FullName).ToSnakeCase()},{nameof(AdministrativeUnit.EnglishFullName).ToSnakeCase()},{nameof(AdministrativeUnit.ShortName).ToSnakeCase()},{nameof(AdministrativeUnit.EnglishShortName).ToSnakeCase()},{nameof(AdministrativeUnit.Id).ToSnakeCase()}) VALUES\r\n\t"
+            + $"('Thành phố trực thuộc trung ương','Municipality','Thành phố','City',1),\r\n\t"
+            + $"('Tỉnh','Province','Tỉnh','Province',2),\r\n\t"
+            + $"('Thành phố thuộc thành phố trực thuộc trung ương','Municipal city','Thành phố','City',3),\r\n\t"
+            + $"('Thành phố thuộc tỉnh','Provincial city','Thành phố','City',4),\r\n\t"
+            + $"('Quận','Urban district','Quận','District',5),\r\n\t"
+            + $"('Thị xã','District-level town','Thị xã','Town',6),\r\n\t"
+            + $"('Huyện','District','Huyện','District',7),\r\n\t"
+            + $"('Phường','Ward','Phường','Ward',8),\r\n\t"
+            + $"('Thị trấn','Commune-level town','Thị trấn','Township',9),\r\n\t"
+            + $"('Xã','Commune','Xã','Commune',10);";
+    }
+
+    private static string GenerateValueSqlQuery(
+        string databaseType,
+        PropertyInfo propertyInfo,
+        object obj
+    )
+    {
+        string sql = string.Empty;
+        string? value = propertyInfo?.GetValue(obj, null)?.ToString();
+        if (
+            (
+                propertyInfo?.Name == nameof(Region.Name)
+                || propertyInfo?.Name == nameof(Region.FullName)
+                || (
+                    propertyInfo?.Name == nameof(Region.CustomName)
+                    && !string.IsNullOrWhiteSpace(value)
+                )
+            )
+            && (databaseType == DbSettingName.SqlServer || databaseType == DbSettingName.OracleSql)
+        )
+        {
+            sql += "N";
+        }
+        return sql + $"'{value}',";
     }
 }
 

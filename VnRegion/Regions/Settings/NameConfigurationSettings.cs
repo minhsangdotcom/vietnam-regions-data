@@ -10,7 +10,7 @@ public class NameConfigurationSettings
 
     public Name? AdministrativeUnitConfigs { get; set; }
 
-    public string? DbSetting { get; set; }
+    public string? DbSetting { get; set; } = DbSettingName.SqlServer;
 }
 
 public class Name
@@ -23,5 +23,10 @@ public class Name
 public static class DbSettingName
 {
     public const string Mysql = nameof(Mysql);
+
     public const string PostgreSql = nameof(PostgreSql);
+
+    public const string SqlServer = nameof(SqlServer);
+
+    public const string OracleSql = nameof(OracleSql);
 }
