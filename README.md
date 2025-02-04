@@ -223,6 +223,8 @@ cd VietNamRegion
 dotnet run
 ```
 
+Bước 3 : Đi tới thư mục Database và chạy file create_table.sql để tạo cấu trúc dữ liệu.
+
 ### Hướng dẫn sử dụng
 
 Để có được file excel input thì mọi người truy cập vào [website](https://danhmuchanhchinh.gso.gov.vn/) hoặc mình có để ở thư mục [Inputs](/VnRegion/Inputs/).
@@ -337,7 +339,26 @@ Option 2 : Xuất file dữ liệu dưới dạng Sql file.
 
 ### Tùy chỉnh
 
-Có thể tùy chỉnh tên table hoặc tên tên columns tùy ý ở phần applicationsettings.json.
+Tùy chỉnh được thiết lập ở phần appsettings.Development.json.
+
+Tùy chỉnh loại CSDL.
+
+```json
+"DbSetting": "SqlServer",
+```
+
+Những loại cở sở dữ liệu được hỗ trợ:
+
+| Loại CSDL  |
+| ---------- |
+| Mysql      |
+| PostgreSql |
+| SqlServer  |
+| OracleSql  |
+
+**_Tùy chỉnh loại CSDL chỉ áp dụng cho xuất file dạng sql._**
+
+Tùy chỉnh tên table hoặc tên tên columns.
 
 ```json
 "ProvinceConfigs": {
@@ -361,20 +382,38 @@ Có thể tùy chỉnh tên table hoặc tên tên columns tùy ý ở phần ap
 
 Khi tùy chỉnh tên cột thì chỉ cần chỉnh lại value thôi nhé còn key thì giữ nguyên.
 
-VD: Muốn tùy chỉnh tên tiếng anh của tỉnh thành phố thành "EnName" thì chỉ cần sửa lại value của trường EnglishName.
+VD: Muốn tùy chỉnh tên tiếng anh của tỉnh(thành phố) thành "EnName" thì chỉ cần sửa lại value của trường EnglishName.
 
 ```json
 "ColumnNames": {
     "Id": "Id",
     "Code": "Code",
     "Name": "Name",
-    "EnglishName": "EnglishName",
+    "EnglishName": "EnName",
     "FullName": "FullName",
-    "EnglishFullName": "EnName",
+    "EnglishFullName": "EnglishFullName",
     "CustomName": "CustomName",
     "AdministrativeUnitId": "AdministrativeUnitId"
   }
 ```
+# Lưu ý
+
+Có 2 option cho các bạn lựa chọn là tùy chỉnh tên của table, column trong appsettings nếu appsettings trống tự động lấy tên mặc định của entity ở thư mục [Entities](/VnRegion/Regions/Entities/).
+
+Nhưng để đạt được tốc độ tối đa tầm khoảng 2s thì nên chọn tùy chỉnh trong appsettings nhé vì đọc dữ liệu trong appsettings sẽ nhanh hơn dùng reflection đọc dữ liệu ở class.
+
+Phần tùy chỉnh CSDL bằng  DbSetting property thì là bắc buộc nhé, Nếu trong appsettings trống sẽ báo lỗi 500 trước khi chạy.
+
+
+# Speed test
+
+Xuất file Json với API /api/regions/generateJson trong vòng 2 giây đo bằng StopWatch
+
+![speed test json api](/Assets/speedtest-json.png)
+
+Xuất file SQL với API /api/regions/generateSqlQuery trong vòng 2 giây đo bằng StopWatch
+
+![speed test sql api](/Assets/speedtest-sql.png)
 
 # Purpose
 

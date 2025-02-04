@@ -6,10 +6,12 @@ using VnRegion.Regions.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 builder
-    .Services.Configure<NameConfigurationSettings>(
-        builder.Configuration.GetSection(nameof(NameConfigurationSettings))
-    )
-    .AddSingleton<GenerateJsonFileService>()
+    .Services.AddOptions<DatabaseConfigurationSettings>()
+    .Bind(builder.Configuration.GetSection(nameof(DatabaseConfigurationSettings)))
+    .ValidateDataAnnotations();
+
+builder
+    .Services.AddSingleton<GenerateJsonFileService>()
     .AddSingleton<IGenerate, GenerateJsonFileService>(x => x.GetService<GenerateJsonFileService>()!)
     .AddSingleton<GenerateSqlFileService>()
     .AddSingleton<IGenerate, GenerateSqlFileService>(x => x.GetService<GenerateSqlFileService>()!)

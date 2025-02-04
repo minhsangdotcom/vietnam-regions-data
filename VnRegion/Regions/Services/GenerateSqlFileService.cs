@@ -16,9 +16,9 @@ namespace VnRegion.Regions.Services;
 
 public class GenerateSqlFileService : IGenerate
 {
-    private readonly NameConfigurationSettings nameConfigurations;
+    private readonly DatabaseConfigurationSettings nameConfigurations;
 
-    public GenerateSqlFileService(IOptions<NameConfigurationSettings> options)
+    public GenerateSqlFileService(IOptions<DatabaseConfigurationSettings> options)
     {
         nameConfigurations = options.Value;
         nameConfigurations ??= new();
@@ -54,7 +54,7 @@ public class GenerateSqlFileService : IGenerate
         File.WriteAllText(fullPath, result);
 
         stopwatch.Stop();
-        await Console.Out.WriteLineAsync(
+        Console.Out.WriteLine(
             "Exporting has finished in " + stopwatch.ElapsedMilliseconds / 1000 + "s"
         );
 

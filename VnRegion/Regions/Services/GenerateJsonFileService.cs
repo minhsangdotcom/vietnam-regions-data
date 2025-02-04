@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
@@ -14,9 +15,9 @@ using VnRegion.Regions.Settings;
 
 namespace VnRegion.Regions.Services;
 
-public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options) : IGenerate
+public class GenerateJsonFileService(IOptions<DatabaseConfigurationSettings> options) : IGenerate
 {
-    private readonly NameConfigurationSettings nameConfigurations = options.Value;
+    private readonly DatabaseConfigurationSettings nameConfigurations = options.Value;
 
     public async Task<GenerateResponse> GenerateAsync(
         IFormFile sourceFile,
@@ -24,6 +25,10 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         string? output = null
     )
     {
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
+        Console.WriteLine("Starting Json file export......");
+
         using MemoryStream stream = new();
         await sourceFile!.CopyToAsync(stream);
 
@@ -43,6 +48,11 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
             DataChanges dataChanges = HasChangeData(sourceFileRows, updatedFileRows);
             string changesPath = Path.Combine(path, "Changes.json");
             File.WriteAllText(changesPath, SerializerExtension.Serialize(dataChanges!).StringJson);
+
+            stopwatch.Stop();
+            Console.Out.WriteLine(
+                "Exporting has finished in " + stopwatch.ElapsedMilliseconds / 1000 + "s"
+            );
 
             return new()
             {
@@ -223,6 +233,11 @@ public class GenerateJsonFileService(IOptions<NameConfigurationSettings> options
         File.WriteAllText(districtPath, strDistricts);
         File.WriteAllText(wardPath, strWards);
         File.WriteAllText(adminPath, strAdministrativeUnits);
+
+        stopwatch.Stop();
+        Console.Out.WriteLine(
+            "Exporting has finished in " + stopwatch.ElapsedMilliseconds / 1000 + "s"
+        );
 
         return new()
         {

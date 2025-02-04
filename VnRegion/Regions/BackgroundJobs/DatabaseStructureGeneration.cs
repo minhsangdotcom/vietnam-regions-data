@@ -1,14 +1,20 @@
 using System.Text;
 using CaseConverter;
 using Microsoft.Extensions.Options;
+using VnRegion.Regions.Entities;
 using VnRegion.Regions.Settings;
 
 namespace VnRegion.Regions.BackgroundJobs;
 
-public class DatabaseStructureGeneration(IOptions<NameConfigurationSettings> options)
-    : IHostedLifecycleService
+public class DatabaseStructureGeneration : IHostedLifecycleService
 {
-    private readonly NameConfigurationSettings configurationSettings = options.Value;
+    private readonly DatabaseConfigurationSettings configurationSettings;
+
+    public DatabaseStructureGeneration(IOptions<DatabaseConfigurationSettings> options)
+    {
+        configurationSettings = options.Value;
+        configurationSettings ??= new();
+    }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -18,7 +24,7 @@ public class DatabaseStructureGeneration(IOptions<NameConfigurationSettings> opt
         if (!File.Exists(databasePath))
         {
             Console.WriteLine("Generating database structure...");
-            string sqlScript = GenerateSQL(configurationSettings);
+            string sqlScript = GenerateSQL(PrepareSettings(configurationSettings));
             await File.WriteAllTextAsync(databasePath, sqlScript, cancellationToken);
             Console.WriteLine("Generating has finished.");
         }
@@ -49,11 +55,13 @@ public class DatabaseStructureGeneration(IOptions<NameConfigurationSettings> opt
         await Task.CompletedTask;
     }
 
-    static string GenerateSQL(NameConfigurationSettings config)
+    static string GenerateSQL(DatabaseConfigurationSettings config)
     {
         var sb = new StringBuilder();
         sb.AppendLine("-- Auto-generated SQL script");
         sb.AppendLine("-- Database: " + config.DbSetting);
+        sb.AppendLine("CREATE DATABASE vietnamese_region_data;");
+        sb.AppendLine("USE vietnamese_region_data;\n");
 
         string administrativeUnitFk =
             $"{config.AdministrativeUnitConfigs!.TableName}_id".ToSnakeCase();
@@ -91,7 +99,7 @@ public class DatabaseStructureGeneration(IOptions<NameConfigurationSettings> opt
 
     static void AppendCreateTableSQL(
         StringBuilder sb,
-        Name tableConfig,
+        TableConfiguration tableConfig,
         bool isAdministrativeUnit,
         params string[] foreignKeys
     )
@@ -99,28 +107,40 @@ public class DatabaseStructureGeneration(IOptions<NameConfigurationSettings> opt
         sb.AppendLine($"CREATE TABLE {tableConfig.TableName.ToSnakeCase()} (");
         foreach (var col in tableConfig.ColumnNames)
         {
-            if (col.Key == "Id")
+            if (col.Key == nameof(Region.CreatedAt))
             {
-                if (isAdministrativeUnit)
+                continue;
+            }
+
+            switch (true)
+            {
+                case bool when col.Key == nameof(Region.Id):
                 {
-                    sb.AppendLine($"    {col.Value.ToSnakeCase()} INT NOT NULL PRIMARY KEY,");
+                    if (isAdministrativeUnit)
+                    {
+                        sb.AppendLine($"    {col.Value.ToSnakeCase()} INT NOT NULL PRIMARY KEY,");
+                    }
+                    else
+                    {
+                        sb.AppendLine(
+                            $"    {col.Value.ToSnakeCase()} CHAR(26) NOT NULL PRIMARY KEY,"
+                        );
+                    }
+                    break;
                 }
-                else
+                case bool when col.Key == nameof(Region.AdministrativeUnitId):
                 {
-                    sb.AppendLine($"    {col.Value.ToSnakeCase()} CHAR(26) NOT NULL PRIMARY KEY,");
+                    sb.AppendLine($"    {col.Value.ToSnakeCase()} INT NOT NULL,");
+                    break;
                 }
-            }
-            else if (col.Key == "AdministrativeUnitId")
-            {
-                sb.AppendLine($"    {col.Value.ToSnakeCase()} INT NOT NULL,");
-            }
-            else if (col.Key.EndsWith("Id"))
-            {
-                sb.AppendLine($"    {col.Value.ToSnakeCase()} CHAR(26),");
-            }
-            else
-            {
-                sb.AppendLine($"    {col.Value.ToSnakeCase()} VARCHAR(255),");
+                case bool when col.Key.EndsWith("Id"):
+                {
+                    sb.AppendLine($"    {col.Value.ToSnakeCase()} CHAR(26),");
+                    break;
+                }
+                default:
+                    sb.AppendLine(CreateColumn(col.Key, col.Value));
+                    break;
             }
         }
 
@@ -135,5 +155,79 @@ public class DatabaseStructureGeneration(IOptions<NameConfigurationSettings> opt
         }
 
         sb.AppendLine(");\n");
+    }
+
+    private static string CreateColumn(string property, string value)
+    {
+        string dataType = string.Empty;
+        if (
+            property == nameof(Region.Name)
+            || property == nameof(Region.FullName)
+            || property == nameof(Region.CustomName)
+        )
+        {
+            dataType += "N";
+        }
+        return $"    {value.ToSnakeCase()} {dataType}VARCHAR(255),";
+    }
+
+    private DatabaseConfigurationSettings PrepareSettings(
+        DatabaseConfigurationSettings configurationSettings
+    )
+    {
+        if (
+            configurationSettings.AdministrativeUnitConfigs == null
+            || configurationSettings.AdministrativeUnitConfigs is { }
+        )
+        {
+            configurationSettings.AdministrativeUnitConfigs = new()
+            {
+                TableName = nameof(AdministrativeUnit),
+                ColumnNames = typeof(AdministrativeUnit)
+                    .GetProperties()
+                    .ToDictionary(property => property.Name, property => property.Name),
+            };
+        }
+
+        if (
+            configurationSettings.ProvinceConfigs == null
+            || configurationSettings.ProvinceConfigs is { }
+        )
+        {
+            configurationSettings.ProvinceConfigs = new()
+            {
+                TableName = nameof(Province),
+                ColumnNames = typeof(Province)
+                    .GetProperties()
+                    .ToDictionary(property => property.Name, property => property.Name),
+            };
+        }
+
+        if (
+            configurationSettings.DistrictConfigs == null
+            || configurationSettings.DistrictConfigs is { }
+        )
+        {
+            configurationSettings.DistrictConfigs = new()
+            {
+                TableName = nameof(District),
+                ColumnNames = typeof(District)
+                    .GetProperties()
+                    .ToDictionary(property => property.Name, property => property.Name),
+            };
+        }
+
+        if (configurationSettings.WardConfigs == null || configurationSettings.WardConfigs is { })
+        {
+            configurationSettings.WardConfigs = new()
+            {
+                TableName = nameof(Ward),
+                ColumnNames = typeof(Ward)
+                    .GetProperties()
+                    .ToDictionary(property => property.Name, property => property.Name),
+            };
+        }
+
+        return configurationSettings;
     }
 }
