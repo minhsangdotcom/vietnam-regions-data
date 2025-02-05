@@ -67,10 +67,11 @@ public class DatabaseStructureGeneration : IHostedLifecycleService
             $"{config.AdministrativeUnitConfigs!.TableName}_id".ToSnakeCase();
         string provinceFk = $"{config.ProvinceConfigs!.TableName}_id".ToSnakeCase();
         string districtFk = $"{config.DistrictConfigs!.TableName}_id".ToSnakeCase();
-        AppendCreateTableSQL(sb, config.AdministrativeUnitConfigs!, true);
+        AppendCreateTableSQL(sb, config.AdministrativeUnitConfigs!, config.DbSetting!, true);
         AppendCreateTableSQL(
             sb,
             config.ProvinceConfigs!,
+            config.DbSetting!,
             false,
             administrativeUnitFk,
             config.AdministrativeUnitConfigs!.TableName!.ToSnakeCase()
@@ -78,6 +79,7 @@ public class DatabaseStructureGeneration : IHostedLifecycleService
         AppendCreateTableSQL(
             sb,
             config.DistrictConfigs!,
+            config.DbSetting!,
             false,
             administrativeUnitFk,
             config.AdministrativeUnitConfigs.TableName!.ToSnakeCase(),
@@ -87,6 +89,7 @@ public class DatabaseStructureGeneration : IHostedLifecycleService
         AppendCreateTableSQL(
             sb,
             config.WardConfigs!,
+            config.DbSetting!,
             false,
             administrativeUnitFk,
             config.AdministrativeUnitConfigs!.TableName!.ToSnakeCase(),
@@ -100,6 +103,7 @@ public class DatabaseStructureGeneration : IHostedLifecycleService
     static void AppendCreateTableSQL(
         StringBuilder sb,
         TableConfiguration tableConfig,
+        string dbSetting,
         bool isAdministrativeUnit,
         params string[] foreignKeys
     )
@@ -139,7 +143,7 @@ public class DatabaseStructureGeneration : IHostedLifecycleService
                     break;
                 }
                 default:
-                    sb.AppendLine(CreateColumn(col.Key, col.Value));
+                    sb.AppendLine(CreateColumn(col.Key, col.Value, dbSetting));
                     break;
             }
         }
@@ -157,13 +161,15 @@ public class DatabaseStructureGeneration : IHostedLifecycleService
         sb.AppendLine(");\n");
     }
 
-    private static string CreateColumn(string property, string value)
+    private static string CreateColumn(string property, string value, string dbSetting)
     {
         string dataType = string.Empty;
         if (
-            property == nameof(Region.Name)
-            || property == nameof(Region.FullName)
-            || property == nameof(Region.CustomName)
+            (
+                property == nameof(Region.Name)
+                || property == nameof(Region.FullName)
+                || property == nameof(Region.CustomName)
+            ) && (dbSetting == DbSettingName.OracleSql || dbSetting == DbSettingName.SqlServer)
         )
         {
             dataType += "N";
